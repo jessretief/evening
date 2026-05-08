@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evening</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0e0f;
+    --surface: #161618;
+    --border: #2a2a2e;
+    --text: #e8e4dc;
+    --muted: #6b6860;
+    --accent: #c9a96e;
+    --accent-dim: #8a6f45;
+    --danger: #c47b6b;
+    --safe: #7ba18a;
+    --warn: #c4a46b;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-weight: 300;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 80px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 12px;
+    width: 100%;
+    max-width: 520px;
+    position: relative;
+  }
+
+  .header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-style: italic;
+    font-size: 2.4rem;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+  }
+
+  .header .date {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 6px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .export-btn-top {
+    position: absolute;
+    right: 0;
+    top: 8px;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid var(--border);
+    padding: 5px 10px;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    transition: all 0.2s;
+  }
+  .export-btn-top:hover { color: var(--accent); border-color: var(--accent-dim); }
+
+  .progress-wrap {
+    width: 100%;
+    max-width: 520px;
+    margin-bottom: 32px;
+    margin-top: 24px;
+  }
+
+  .progress-bar { width: 100%; height: 1px; background: var(--border); }
+  .progress-fill { height: 1px; background: var(--accent); transition: width 0.6s ease; }
+
+  .progress-label {
+    font-size: 0.62rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .nav-dots { display: flex; gap: 8px; justify-content: center; margin-bottom: 28px; }
+  .dot { width: 4px; height: 4px; background: var(--border); border-radius: 50%; transition: background 0.3s; }
+  .dot.active { background: var(--accent); }
+  .dot.done   { background: var(--accent-dim); }
+
+  .card {
+    width: 100%;
+    max-width: 520px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 32px;
+    margin-bottom: 20px;
+  }
+
+  .card-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent-dim);
+    margin-bottom: 16px;
+  }
+
+  .card h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: 1.5rem;
+    margin-bottom: 14px;
+    line-height: 1.3;
+  }
+
+  .card p {
+    font-size: 0.76rem;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 18px;
+  }
+
+  .carryover {
+    border: 1px solid var(--accent-dim);
+    background: rgba(201,169,110,0.04);
+    padding: 14px 16px;
+    margin-bottom: 20px;
+  }
+
+  .carryover-label {
+    font-size: 0.58rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-dim);
+    margin-bottom: 8px;
+  }
+
+  .carryover-text { font-size: 0.75rem; line-height: 1.8; color: var(--text); white-space: pre-wrap; }
+
+  textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.76rem;
+    font-weight: 300;
+    padding: 12px 14px;
+    resize: none;
+    outline: none;
+    line-height: 1.8;
+    transition: border-color 0.2s;
+  }
+  textarea:focus { border-color: var(--accent-dim); }
+  textarea::placeholder { color: var(--muted); }
+
+  .btn {
+    display: inline-block;
+    padding: 10px 24px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: 1px solid var(--accent-dim);
+    background: transparent;
+    color: var(--accent);
+    transition: all 0.2s;
+  }
+  .btn:hover { background: var(--accent); color: var(--bg); }
+  .btn-ghost { border-color: var(--border); color: var(--muted); }
+  .btn-ghost:hover { background: var(--border); color: var(--text); }
+
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; max-width: 520px; width: 100%; }
+
+  .step { display: none; width: 100%; align-items: center; flex-direction: column; }
+  .step.active { display: flex; }
+
+  .section-divider { width: 40px; height: 1px; background: var(--accent-dim); margin: 20px 0; opacity: 0.4; }
+
+  .overdue-note {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    border-left: 2px solid var(--accent-dim);
+    background: rgba(201,169,110,0.04);
+    line-height: 1.6;
+  }
+
+  .contact-item {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .contact-item:last-child { border-bottom: none; }
+  .contact-name { font-size: 0.82rem; }
+  .contact-meta { font-size: 0.63rem; color: var(--muted); margin-top: 3px; }
+
+  .score-badge { font-size: 0.63rem; padding: 3px 8px; white-space: nowrap; }
+  .score-high { background: rgba(196,123,107,0.15); color: var(--danger); border: 1px solid rgba(196,123,107,0.3); }
+  .score-mid  { background: rgba(196,164,107,0.15); color: var(--warn);   border: 1px solid rgba(196,164,107,0.3); }
+  .score-low  { background: rgba(123,161,138,0.15); color: var(--safe);   border: 1px solid rgba(123,161,138,0.3); }
+
+  .touch-btn {
+    font-size: 0.6rem;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.06em;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .touch-btn:hover  { border-color: var(--safe); color: var(--safe); }
+  .touch-btn.touched { border-color: var(--safe); color: var(--safe); background: rgba(123,161,138,0.1); }
+
+  .add-form { display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
+  .add-form.open { display: block; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+
+  .form-field label {
+    display: block;
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .form-field input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.73rem;
+    font-weight: 300;
+    padding: 9px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-field input:focus { border-color: var(--accent-dim); }
+
+  .no-contacts { font-size: 0.74rem; color: var(--muted); padding: 20px 0; text-align: center; }
+
+  .morning-item { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; }
+  .morning-num { font-size: 0.63rem; color: var(--accent-dim); letter-spacing: 0.08em; min-width: 20px; }
+  .morning-input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.74rem;
+    font-weight: 300;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .morning-input:focus { border-color: var(--accent-dim); }
+  .morning-input::placeholder { color: var(--muted); }
+
+  .done-card {
+    width: 100%;
+    max-width: 520px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 48px 32px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .done-glyph { font-family: 'Cormorant Garamond', serif; font-size: 3.5rem; color: var(--accent); display: block; margin-bottom: 20px; }
+  .done-card h2 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-style: italic; font-size: 1.8rem; margin-bottom: 10px; }
+  .done-card p { font-size: 0.72rem; color: var(--muted); line-height: 1.9; }
+
+  .summary-box {
+    width: 100%;
+    max-width: 520px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 20px 24px;
+    margin-bottom: 12px;
+  }
+  .summary-label { font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent-dim); margin-bottom: 10px; }
+  .summary-text { font-size: 0.75rem; line-height: 1.8; color: var(--text); white-space: pre-wrap; }
+
+  .export-panel {
+    display: none;
+    width: 100%;
+    max-width: 520px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 28px 32px;
+    margin-bottom: 20px;
+  }
+  .export-panel.open { display: block; }
+
+  .export-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .export-option:last-of-type { border-bottom: none; }
+  .export-option-label { font-size: 0.75rem; }
+  .export-option-meta { font-size: 0.63rem; color: var(--muted); margin-top: 3px; }
+
+  @media (max-width: 480px) {
+    .form-row { grid-template-columns: 1fr; }
+    .card { padding: 22px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Evening</h1>
+  <div class="date" id="dateDisplay"></div>
+  <button class="export-btn-top" onclick="toggleExport()">Export</button>
+</div>
+
+<div class="export-panel" id="exportPanel">
+  <div class="card-label" style="margin-bottom:16px">Export data</div>
+  <div class="export-option">
+    <div>
+      <div class="export-option-label">Nightly log</div>
+      <div class="export-option-meta">All saved sessions — one row per night</div>
+    </div>
+    <button class="btn" onclick="exportLog()">Download CSV</button>
+  </div>
+  <div class="export-option">
+    <div>
+      <div class="export-option-label">Contact list</div>
+      <div class="export-option-meta">Name, relationship, frequency, last contacted</div>
+    </div>
+    <button class="btn" onclick="exportContacts()">Download CSV</button>
+  </div>
+  <div style="margin-top:20px">
+    <button class="btn btn-ghost" onclick="toggleExport()">Close</button>
+  </div>
+</div>
+
+<div class="nav-dots" id="navDots"></div>
+
+<div class="progress-wrap">
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+  </div>
+  <div class="progress-label">
+    <span id="stepLabel">step 1 of 6</span>
+    <span id="stepName">Today</span>
+  </div>
+</div>
+
+<!-- STEP 0 -->
+<div class="step active" id="step-0">
+  <div class="card">
+    <div class="card-label">01 — Today</div>
+    <h2>How did today go?</h2>
+    <p>One thing worth noting. A win, a moment, something unresolved.</p>
+    <textarea id="todayNote" placeholder="Today..." rows="3"></textarea>
+  </div>
+  <div class="card">
+    <div class="card-label">Anything to action before tomorrow?</div>
+    <textarea id="todayAction" placeholder="e.g. send that email, file that thing..." rows="2"></textarea>
+  </div>
+  <div class="btn-row">
+    <button class="btn" onclick="nextStep()">Continue</button>
+  </div>
+</div>
+
+<!-- STEP 1 -->
+<div class="step" id="step-1">
+  <div class="card">
+    <div class="card-label">02 — Open Threads</div>
+    <h2>What's sitting in the background?</h2>
+    <p>Job search, legal, finances, kids. Write it and give it a next action, or consciously park it.</p>
+    <textarea id="threads" placeholder="Thread — next action or parked..." rows="6"></textarea>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="prevStep()">Back</button>
+    <button class="btn" onclick="nextStep()">Continue</button>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div class="step" id="step-2">
+  <div class="card">
+    <div class="card-label">03 — People</div>
+    <h2>Who needs to hear from you?</h2>
+    <div class="overdue-note" id="overdueNote">Loading...</div>
+    <div id="contactList"></div>
+    <div class="section-divider"></div>
+    <button class="btn btn-ghost" onclick="toggleAddForm()">+ Add contact</button>
+    <div class="add-form" id="addForm">
+      <div class="form-row">
+        <div class="form-field">
+          <label>Name</label>
+          <input type="text" id="newName" placeholder="Full name">
+        </div>
+        <div class="form-field">
+          <label>Relationship</label>
+          <input type="text" id="newRel" placeholder="e.g. close friend">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Last contacted</label>
+          <input type="date" id="newDate">
+        </div>
+        <div class="form-field">
+          <label>Frequency (days)</label>
+          <input type="number" id="newFreq" placeholder="e.g. 14" min="1">
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn" onclick="addContact()">Add</button>
+        <button class="btn btn-ghost" onclick="toggleAddForm()">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="prevStep()">Back</button>
+    <button class="btn" onclick="nextStep()">Continue</button>
+  </div>
+</div>
+
+<!-- STEP 3 -->
+<div class="step" id="step-3">
+  <div class="card">
+    <div class="card-label">04 — Tomorrow</div>
+    <h2>What's on tomorrow?</h2>
+    <p>Check your calendar. Any prep needed tonight?</p>
+    <textarea id="tomorrowCal" placeholder="Appointments, prep, anything to arrange..." rows="3"></textarea>
+    <div class="section-divider"></div>
+    <div class="card-label">Kids — anything needed for tomorrow?</div>
+    <textarea id="kidsNote" placeholder="School, pickups, supplies, activities..." rows="2"></textarea>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="prevStep()">Back</button>
+    <button class="btn" onclick="nextStep()">Continue</button>
+  </div>
+</div>
+
+<!-- STEP 4 -->
+<div class="step" id="step-4">
+  <div class="card">
+    <div class="card-label">05 — Morning Plan</div>
+    <h2>Set the morning before you sleep.</h2>
+    <p>Three things to do when you wake up. You won't have to think about it.</p>
+    <div class="morning-item">
+      <div class="morning-num">01</div>
+      <input class="morning-input" id="m1" type="text" placeholder="First thing...">
+    </div>
+    <div class="morning-item">
+      <div class="morning-num">02</div>
+      <input class="morning-input" id="m2" type="text" placeholder="Second thing...">
+    </div>
+    <div class="morning-item">
+      <div class="morning-num">03</div>
+      <input class="morning-input" id="m3" type="text" placeholder="Third thing...">
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="prevStep()">Back</button>
+    <button class="btn" onclick="nextStep()">Continue</button>
+  </div>
+</div>
+
+<!-- STEP 5 -->
+<div class="step" id="step-5">
+  <div class="card">
+    <div class="card-label">06 — Close</div>
+    <h2>One good thing.</h2>
+    <p>Something from today. Small is fine. It doesn't have to be earned.</p>
+    <textarea id="goodThing" placeholder="..." rows="2"></textarea>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="prevStep()">Back</button>
+    <button class="btn" onclick="finish()">Done for tonight</button>
+  </div>
+</div>
+
+<!-- DONE -->
+<div class="step" id="step-done">
+  <div class="done-card">
+    <span class="done-glyph">◯</span>
+    <h2>The day is handled.</h2>
+    <p>Everything that needed to be held is written down.<br>You can let it go now.</p>
+  </div>
+  <div class="summary-box" id="summaryMorning" style="display:none">
+    <div class="summary-label">Morning plan — for tomorrow</div>
+    <div class="summary-text" id="summaryMorningText"></div>
+  </div>
+  <div class="summary-box" id="summaryGood" style="display:none">
+    <div class="summary-label">One good thing</div>
+    <div class="summary-text" id="summaryGoodText"></div>
+  </div>
+  <div class="btn-row" style="margin-top:8px">
+    <button class="btn btn-ghost" onclick="startOver()">Start again</button>
+    <button class="btn btn-ghost" onclick="toggleExport()">Export data</button>
+  </div>
+</div>
+
+<script>
+const KEY_CONTACTS = 'evening-contacts-v2';
+const KEY_LOG      = 'evening-log-v1';
+let contacts = [];
+let log = [];
+let currentStep = 0;
+const TOTAL_STEPS = 6;
+const STEP_NAMES  = ['Today','Threads','People','Tomorrow','Morning','Close'];
+
+async function init() {
+  const now = new Date();
+  document.getElementById('dateDisplay').textContent =
+    now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}).toUpperCase();
+  document.getElementById('newDate').value = now.toISOString().split('T')[0];
+  await loadContacts();
+  await loadLog();
+  injectLastMorningPlan();
+  renderContactList();
+  buildNavDots();
+  updateProgress();
+}
+
+async function loadContacts() {
+  try { const r = await window.storage.get(KEY_CONTACTS); contacts = r ? JSON.parse(r.value) : []; }
+  catch { contacts = []; }
+}
+async function saveContacts() {
+  try { await window.storage.set(KEY_CONTACTS, JSON.stringify(contacts)); } catch {}
+}
+async function loadLog() {
+  try { const r = await window.storage.get(KEY_LOG); log = r ? JSON.parse(r.value) : []; }
+  catch { log = []; }
+}
+async function saveLog() {
+  try { await window.storage.set(KEY_LOG, JSON.stringify(log)); } catch {}
+}
+
+function injectLastMorningPlan() {
+  if (!log.length) return;
+  const last = log[log.length - 1];
+  if (!last.morning || !last.morning.trim()) return;
+  const card = document.querySelector('#step-0 .card');
+  const box = document.createElement('div');
+  box.className = 'carryover';
+  box.innerHTML = `<div class="carryover-label">Yesterday's morning plan</div>
+    <div class="carryover-text">${escHtml(last.morning)}</div>`;
+  card.insertBefore(box, card.firstChild);
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function getScore(c) {
+  const days = Math.floor((new Date() - new Date(c.lastContacted)) / 86400000);
+  return days / c.frequencyDays;
+}
+function sortedContacts() { return [...contacts].sort((a,b) => getScore(b) - getScore(a)); }
+function scoreBadgeClass(s) { return s >= 1.5 ? 'score-high' : s >= 0.8 ? 'score-mid' : 'score-low'; }
+function scoreLabel(s) { return s >= 1.5 ? 'overdue' : s >= 0.8 ? 'due soon' : 'ok'; }
+
+function renderContactList() {
+  const list = document.getElementById('contactList');
+  const note = document.getElementById('overdueNote');
+  const sorted = sortedContacts();
+  if (!sorted.length) {
+    list.innerHTML = '<div class="no-contacts">No contacts yet. Add someone below.</div>';
+    note.textContent = 'Add your first contact to start tracking.';
+    return;
+  }
+  const overdue = sorted.filter(c => getScore(c) >= 1.0);
+  note.textContent = overdue.length === 0 ? 'Everyone is up to date.'
+    : overdue.length === 1 ? `1 person is due — ${overdue[0].name}.`
+    : `${overdue.length} people are due. Most overdue first.`;
+
+  list.innerHTML = sorted.map((c, i) => {
+    const score = getScore(c);
+    const days  = Math.floor((new Date() - new Date(c.lastContacted)) / 86400000);
+    return `<div class="contact-item">
+      <div>
+        <div class="contact-name">${escHtml(c.name)}</div>
+        <div class="contact-meta">${escHtml(c.relationship)} · every ${c.frequencyDays}d · ${days}d ago</div>
+      </div>
+      <div class="score-badge ${scoreBadgeClass(score)}">${scoreLabel(score)}</div>
+      <button class="touch-btn ${c._touched?'touched':''}" onclick="touchContact(${i})">
+        ${c._touched ? 'done ✓' : 'contacted'}
+      </button>
+    </div>`;
+  }).join('');
+}
+
+async function touchContact(sortedIdx) {
+  const name = sortedContacts()[sortedIdx].name;
+  const i = contacts.findIndex(c => c.name === name);
+  if (i < 0) return;
+  contacts[i].lastContacted = new Date().toISOString().split('T')[0];
+  contacts[i]._touched = true;
+  await saveContacts();
+  renderContactList();
+}
+
+function toggleAddForm() { document.getElementById('addForm').classList.toggle('open'); }
+
+async function addContact() {
+  const name = document.getElementById('newName').value.trim();
+  const rel  = document.getElementById('newRel').value.trim();
+  const date = document.getElementById('newDate').value;
+  const freq = parseInt(document.getElementById('newFreq').value);
+  if (!name || !date || !freq) return;
+  contacts.push({ name, relationship: rel || 'contact', lastContacted: date, frequencyDays: freq, _touched: false });
+  await saveContacts();
+  ['newName','newRel','newFreq'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('newDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('addForm').classList.remove('open');
+  renderContactList();
+}
+
+function buildNavDots() {
+  document.getElementById('navDots').innerHTML =
+    Array.from({length:TOTAL_STEPS},(_,i)=>`<div class="dot" id="dot-${i}"></div>`).join('');
+}
+
+function updateProgress() {
+  const pct = (currentStep / TOTAL_STEPS) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  const done = currentStep >= TOTAL_STEPS;
+  document.getElementById('stepLabel').textContent = done ? 'complete' : `step ${currentStep+1} of ${TOTAL_STEPS}`;
+  document.getElementById('stepName').textContent  = done ? '' : STEP_NAMES[currentStep];
+  for (let i=0;i<TOTAL_STEPS;i++) {
+    const d = document.getElementById(`dot-${i}`);
+    if (d) d.className = 'dot'+(i<currentStep?' done':i===currentStep?' active':'');
+  }
+}
+
+function showStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById(n>=TOTAL_STEPS?'step-done':`step-${n}`).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function nextStep() { currentStep++; updateProgress(); showStep(currentStep); }
+function prevStep() { if(currentStep>0){currentStep--;updateProgress();showStep(currentStep);} }
+
+async function finish() {
+  const morning = ['m1','m2','m3']
+    .map(id => document.getElementById(id).value.trim())
+    .filter(Boolean)
+    .map((t,i) => `0${i+1}  ${t}`)
+    .join('\n');
+
+  const session = {
+    date:        new Date().toISOString().split('T')[0],
+    todayNote:   document.getElementById('todayNote').value.trim(),
+    todayAction: document.getElementById('todayAction').value.trim(),
+    threads:     document.getElementById('threads').value.trim(),
+    tomorrowCal: document.getElementById('tomorrowCal').value.trim(),
+    kidsNote:    document.getElementById('kidsNote').value.trim(),
+    morning,
+    goodThing:   document.getElementById('goodThing').value.trim(),
+    contactsTouched: contacts.filter(c=>c._touched).map(c=>c.name).join('; ')
+  };
+
+  log.push(session);
+  await saveLog();
+  contacts.forEach(c => c._touched = false);
+  await saveContacts();
+
+  if (morning) {
+    document.getElementById('summaryMorning').style.display = 'block';
+    document.getElementById('summaryMorningText').textContent = morning;
+  }
+  if (session.goodThing) {
+    document.getElementById('summaryGood').style.display = 'block';
+    document.getElementById('summaryGoodText').textContent = session.goodThing;
+  }
+
+  currentStep = TOTAL_STEPS;
+  updateProgress();
+  showStep(TOTAL_STEPS);
+}
+
+function startOver() {
+  ['todayNote','todayAction','threads','tomorrowCal','kidsNote','goodThing']
+    .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  ['m1','m2','m3'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('summaryMorning').style.display = 'none';
+  document.getElementById('summaryGood').style.display = 'none';
+  currentStep = 0;
+  updateProgress();
+  showStep(0);
+}
+
+function toggleExport() {
+  document.getElementById('exportPanel').classList.toggle('open');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function csvEscape(val) {
+  if (val==null) return '';
+  const s = String(val).replace(/\n/g,' | ');
+  return (s.includes(',')||s.includes('"')) ? `"${s.replace(/"/g,'""')}"` : s;
+}
+
+function downloadCSV(filename, rows) {
+  const content = rows.map(r => r.map(csvEscape).join(',')).join('\n');
+  const blob = new Blob([content],{type:'text/csv'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href=url; a.download=filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportLog() {
+  const headers = ['Date','How today went','Actions from today','Open threads',
+    'Tomorrow','Kids','Morning plan','One good thing','Contacts touched'];
+  const rows = log.map(s=>[s.date,s.todayNote,s.todayAction,s.threads,
+    s.tomorrowCal,s.kidsNote,s.morning,s.goodThing,s.contactsTouched]);
+  downloadCSV('evening-log.csv',[headers,...rows]);
+}
+
+function exportContacts() {
+  const headers = ['Name','Relationship','Frequency (days)','Last contacted'];
+  const rows = contacts.map(c=>[c.name,c.relationship,c.frequencyDays,c.lastContacted]);
+  downloadCSV('evening-contacts.csv',[headers,...rows]);
+}
+
+init();
+</script>
+</body>
+</html>
